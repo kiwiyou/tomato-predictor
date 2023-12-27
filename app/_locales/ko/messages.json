@@ -1,0 +1,14 @@
+{
+  "appName": {
+    "message": "토마토 예측기",
+    "description": "The name of the application"
+  },
+  "appShortName": {
+    "message": "tomato",
+    "description": "The short_name (maximum of 12 characters recommended) is a short version of the app's name."
+  },
+  "appDescription": {
+    "message": "solved.ac 아레나를 위한 퍼포먼스 예측기",
+    "description": "The description of the application"
+  }
+}
