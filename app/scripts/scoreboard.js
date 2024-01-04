@@ -11,7 +11,8 @@ async function init() {
   const anchors = document.querySelectorAll(
     'a[href^="https://solved.ac/profile/"]',
   );
-  for (const anchor of anchors) {
+
+  const updateRating = (anchor) => {
     const rankDiv = anchor.parentElement.previousElementSibling;
     const rank = +rankDiv.textContent.replace('#', '');
     const P = computeP(E, rank, arenaInfo.B);
@@ -23,7 +24,7 @@ async function init() {
         ...arenaInfo,
       },
     }).then((ratingInfo) => {
-      if (ratingInfo === null) return;
+      if (!ratingInfo) return;
       const { rating, delta } = ratingInfo;
       const perfSpan = document.createElement('div');
       perfSpan.classList.add('tomato-perf');
@@ -38,7 +39,24 @@ async function init() {
       rankDiv.append(perfSpan, ratingSpan);
       rankDiv.style.flexDirection = 'column';
     });
-  }
+  };
+
+  anchors.forEach(updateRating);
+
+  const root = document.getElementById('root');
+
+  const observeTree = (mutations) => {
+    for (const mutation of mutations) {
+      if (mutation.addedNodes.length === 0) continue;
+      const anchor = mutation.addedNodes[0].querySelector(
+        'a[href^="https://solved.ac/profile/"]',
+      );
+      if (!anchor) continue;
+      updateRating(anchor);
+    }
+  };
+
+  new MutationObserver(observeTree).observe(root, { childList: true });
 }
 
 function sendMessage(args) {
