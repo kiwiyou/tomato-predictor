@@ -6,10 +6,8 @@ async function init() {
   const contestId = +new URL(location.href).searchParams.get('contestId');
   if (contestId === undefined) return;
   const arenaInfo = await sendMessage({ query: 'getArenaInfo', contestId });
-  console.log(arenaInfo);
   if (arenaInfo === null) return;
   const E = await sendMessage({ query: 'getExpectancy', arenaInfo });
-  console.log(E);
   if (E === null) return;
   const anchors = document.querySelectorAll(
     'a[href^="https://solved.ac/profile/"]',

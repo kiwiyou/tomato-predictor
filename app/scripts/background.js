@@ -41,7 +41,7 @@ async function getArenaInfo(contestId) {
 async function getExpectancy({ arenaId, startTime }) {
   const C = parseISO(startTime);
   const E = [];
-  for (let page = 1; page <= 3; ++page) {
+  for (let page = 1; page <= 8; ++page) {
     const { items: contestants } = await fetch(
       `https://solved.ac/api/v3/arena/contestants?arenaId=${arenaId}&page=${page}&sort=rating&direction=desc`,
       {
