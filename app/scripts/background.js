@@ -4,13 +4,19 @@ const ext = global.browser || global.chrome;
 
 ext.runtime.onMessage.addListener((request, sender, sendResponse) => {
   if (request.query === 'getArenaInfo') {
-    getArenaInfo(request.contestId).then(sendResponse);
+    getArenaInfo(request.contestId)
+      .then(sendResponse)
+      .catch(() => sendResponse(null));
     return true;
   } else if (request.query === 'getExpectancy') {
-    getExpectancy(request.arenaInfo).then(sendResponse);
+    getExpectancy(request.arenaInfo)
+      .then(sendResponse)
+      .catch(() => sendResponse(null));
     return true;
   } else if (request.query === 'getRating') {
-    getRating(request.performance).then(sendResponse);
+    getRating(request.performance)
+      .then(sendResponse)
+      .catch(() => sendResponse(null));
     return true;
   }
   return false;
@@ -35,7 +41,7 @@ async function getArenaInfo(contestId) {
 async function getExpectancy({ arenaId, startTime }) {
   const C = parseISO(startTime);
   const E = [];
-  for (let page = 1; page <= 1; ++page) {
+  for (let page = 1; page <= 3; ++page) {
     const { items: contestants } = await fetch(
       `https://solved.ac/api/v3/arena/contestants?arenaId=${arenaId}&page=${page}&sort=rating&direction=desc`,
       {
@@ -70,6 +76,9 @@ async function getExpectancy({ arenaId, startTime }) {
       if (denom === 0) {
         const { rating } = await fetch(
           `https://solved.ac/api/v3/user/show?handle=${handle}`,
+          {
+            cache: 'force-cache',
+          },
         ).then((r) => r.json());
         E.push(800 + Math.floor(rating / 2.4));
       } else {
@@ -107,17 +116,26 @@ async function getRating({ handle, Pi, startTime }) {
     i++;
   }
   const N = i - 1;
-  const r = Math.floor(
+  const r =
     Math.log2(numer / denom) * 800 +
-      600 -
-      (Math.sqrt(1 - Math.pow(0.64, N)) / (3 * (1 - Math.pow(0.8, N)))) * 1800,
+    600 -
+    (Math.sqrt(1 - Math.pow(0.64, N)) / (3 * (1 - Math.pow(0.8, N)))) * 1800;
+  const R = Math.floor(
+    r < 400
+      ? Math.max(1, 400 / Math.exp((400 - r) / 400))
+      : r >= 2400
+        ? 800 * Math.log((r - 1600) / 800) + 2400
+        : r,
   );
   const { arenaRating } = await fetch(
     `https://solved.ac/api/v3/user/show?handle=${handle}`,
+    {
+      cache: 'force-cache',
+    },
   ).then((r) => r.json());
   return {
-    rating: r,
-    delta: r - arenaRating,
+    rating: R,
+    delta: R - arenaRating,
   };
 }
 
