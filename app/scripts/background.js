@@ -23,9 +23,9 @@ ext.runtime.onMessage.addListener((request, sender, sendResponse) => {
 });
 
 async function getArenaInfo(contestId) {
-  const contests = await fetch(`https://solved.ac/api/v3/arena/contests`, {
-    cache: 'force-cache',
-  }).then((r) => r.json());
+  const contests = await fetch(`https://solved.ac/api/v3/arena/contests`).then(
+    (r) => r.json(),
+  );
   for (const contest of [...contests.ongoing, ...contests.ended]) {
     if (contest.arenaBojContestId === contestId) {
       return {
