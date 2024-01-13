@@ -93,9 +93,6 @@ async function getRating({ handle, Pi, startTime }) {
   const C = parseISO(startTime);
   const { items: contests } = await fetch(
     `https://solved.ac/api/v3/user/contests?handle=${handle}&page=1&sort=id&direction=desc`,
-    {
-      cache: 'force-cache',
-    },
   ).then((r) => r.json());
   const c = (P) => Math.pow(2, P / 800);
   let numer = c(Pi) * 0.8;
@@ -109,7 +106,7 @@ async function getRating({ handle, Pi, startTime }) {
     if (!isBefore(Ti, C)) continue;
     const Wi = Math.min(
       Math.pow(0.8, i),
-      Math.pow(0.25, Math.floor(differenceInDays(Ti, C) / 365)),
+      Math.pow(0.25, differenceInDays(Ti, C) / 365),
     );
     numer += c(performance) * Wi;
     denom += Wi;
