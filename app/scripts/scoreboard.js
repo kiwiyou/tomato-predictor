@@ -17,7 +17,7 @@ async function init() {
     const rankDiv = rankSpan.parentElement;
     rankDiv.style.flexDirection = 'column';
     const rank = +rankSpan.textContent.replace('#', '');
-    const P = computeP(E, rank, arenaInfo.B);
+    const P = computeP(E, rank, +arenaInfo.B);
 
     let perfSpan = rankDiv.getElementsByClassName('tomato-perf')[0];
     if (!perfSpan) {

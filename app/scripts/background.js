@@ -2,6 +2,23 @@ import { parseISO, differenceInDays, isBefore } from 'date-fns';
 
 const ext = global.browser || global.chrome;
 
+const B = [
+  0,
+  1800,
+  1800,
+  1800,
+  1800,
+  2200,
+  2200,
+  2600,
+  2600,
+  3000,
+  3000,
+  3400,
+  3400,
+  'Infinity',
+];
+
 ext.runtime.onMessage.addListener((request, sender, sendResponse) => {
   if (request.query === 'getArenaInfo') {
     getArenaInfo(request.contestId)
@@ -136,22 +153,6 @@ async function getRating({ handle, Pi, startTime }) {
   };
 }
 
-const B = [
-  0,
-  1800,
-  1800,
-  1800,
-  1800,
-  2200,
-  2200,
-  2600,
-  2600,
-  3000,
-  3000,
-  3400,
-  3400,
-  Infinity,
-];
 function unfix(p, bi) {
   const b = B[bi];
   return p < b ? p : 2 * (p - b) + b;
