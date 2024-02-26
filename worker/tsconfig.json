@@ -1,0 +1,13 @@
+{
+  "include": ["src/**/*"],
+  "exclude": ["functions/**/*", "node_modules", "dist"],
+  "compilerOptions": {
+    "noEmit": true,
+    "strict": true,
+    "target": "esnext",
+    "module": "esnext",
+    "lib": ["esnext"],
+    "moduleResolution": "node",
+    "types": ["@cloudflare/workers-types"]
+  }
+}

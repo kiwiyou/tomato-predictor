@@ -1,0 +1,22 @@
+{
+  "name": "worker",
+  "private": true,
+  "version": "1.0.0",
+  "main": "index.js",
+  "license": "MIT",
+  "scripts": {
+    "deploy": "wrangler deploy src/index.ts",
+    "dev": "wrangler dev",
+    "start": "wrangler dev"
+  },
+  "devDependencies": {
+    "@cloudflare/workers-types": "^4.20240222.0",
+    "typescript": "^5.3.3",
+    "wrangler": "^3.29.0"
+  },
+  "dependencies": {
+    "@upstash/redis": "^1.28.4",
+    "date-fns": "^3.3.1",
+    "itty-router": "^4.0.27"
+  }
+}

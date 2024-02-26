@@ -1,4 +1,4 @@
-import { redis } from "./redis";
+import { Redis } from "@upstash/redis/cloudflare";
 
 export type Arena = {
   arenaBojContestId: number;
@@ -7,11 +7,12 @@ export type Arena = {
   ratedRangeEnd: number;
 };
 
-export async function getCurrentArenas(): Promise<Arena[]> {
+export async function getCurrentArenas(redis: Redis): Promise<Arena[]> {
   let arenas = await redis.get<Arena[]>("arenas");
   if (arenas === null) {
-    const remote = await fetch(`https://solved.ac/api/v3/arena/contests`);
-    const { ongoing, ended } = await remote.json();
+    const remote = await fetch("https://solved.ac/api/v3/arena/contests");
+    const { ongoing, ended }: { ongoing: Arena[]; ended: Arena[] } =
+      await remote.json();
     arenas = [ongoing, ended]
       .flat()
       .map(({ arenaBojContestId, arenaId, startTime, ratedRangeEnd }) => ({
@@ -36,9 +37,9 @@ export async function getContestants(id: number): Promise<string[]> {
     url.searchParams.set("arenaId", id.toString());
     url.searchParams.set("page", page.toString());
     const remote = await fetch(url);
-    const { items, ...res } = await remote.json();
+    const { items, ...res }: { items: { handle: string }[]; count: number } =
+      await remote.json();
     count = res.count;
-    // @ts-ignore
     contestants.push(...items.map(({ handle }) => handle));
     page += 1;
   } while (contestants.length < count);
@@ -77,7 +78,10 @@ export type Contest = {
   ratedRangeEnd: number;
 };
 
-export async function getContests(handle: string): Promise<Contest[]> {
+export async function getContests(
+  redis: Redis,
+  handle: string
+): Promise<Contest[]> {
   let contests = await redis.get<Contest[]>(`contests.${handle}`);
   if (contests === null) {
     let count = 0;
@@ -89,29 +93,32 @@ export async function getContests(handle: string): Promise<Contest[]> {
       url.searchParams.set("page", page.toString());
       console.log(url.toString());
       const remote = await fetch(url);
-      const { items, ...res } = await remote.json();
+      const {
+        items,
+        ...res
+      }: {
+        items: (Record<string, unknown> & { arena: Record<string, unknown> })[];
+        count: number;
+      } = await remote.json();
       count = +res.count;
       contests.push(
         ...items.map(
           ({
-            // @ts-ignore
             performance,
-            // @ts-ignore
             ratingBefore,
-            // @ts-ignore
             ratingAfter,
-            // @ts-ignore
             arena: { startTime, endTime, ratedRangeStart, ratedRangeEnd },
-          }) => ({
-            performance,
-            ratingBefore,
-            ratingAfter,
-            startTime,
-            endTime,
-            ratedRangeStart,
-            ratedRangeEnd,
-          }),
-        ),
+          }) =>
+            ({
+              performance,
+              ratingBefore,
+              ratingAfter,
+              startTime,
+              endTime,
+              ratedRangeStart,
+              ratedRangeEnd,
+            }) as Contest
+        )
       );
       page += 1;
     } while (contests.length < count);
