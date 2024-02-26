@@ -23,7 +23,7 @@ export async function GET(
     const C = parseISO(arena.startTime);
     const handles = await getContestants(arena.arenaId);
     const readable = new ReadableStream({
-      async pull(controller) {
+      async start(controller) {
         controller.enqueue(`[`);
         let first = true;
         try {
