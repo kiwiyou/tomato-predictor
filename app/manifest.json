@@ -28,6 +28,6 @@
       "all_frames": false
     }
   ],
-  "__firefox|opera|safari__permissions": ["https://solved.ac/api/v3/*"],
-  "__chrome|edge__host_permissions": ["https://solved.ac/api/v3/*"]
+  "__firefox|opera|safari__permissions": ["https://tomato.kiwiyou.dev/api/*"],
+  "__chrome|edge__host_permissions": ["https://tomato.kiwiyou.dev/api/v3/*"]
 }

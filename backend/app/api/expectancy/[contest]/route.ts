@@ -7,13 +7,13 @@ export const runtime = "edge";
 
 export async function GET(
   request: Request,
-  { params }: { params: { contest: string } }
+  { params }: { params: { contest: string } },
 ) {
   let E = await redis.get<number[]>(`E.${params.contest}`);
   if (E === null) {
     const arenas = await getCurrentArenas();
     const arena = arenas.find(
-      (arena) => arena.arenaBojContestId === +params.contest
+      (arena) => arena.arenaBojContestId === +params.contest,
     );
     if (arena === undefined) {
       return new Response("Not Found", {
@@ -42,7 +42,7 @@ export async function GET(
                 const pi = unfix(performance, ratedRangeEnd);
                 const Wi = Math.min(
                   Math.pow(0.8, i),
-                  Math.pow(0.25, Math.floor(differenceInDays(C, Ti) / 365))
+                  Math.pow(0.25, Math.floor(differenceInDays(C, Ti) / 365)),
                 );
                 numer += pi * Wi;
                 denom += Wi;
@@ -51,7 +51,7 @@ export async function GET(
               let P;
               if (denom === 0) {
                 const { rating } = await fetch(
-                  `https://solved.ac/api/v3/user/show?handle=${handle}`
+                  `https://solved.ac/api/v3/user/show?handle=${handle}`,
                 ).then((r) => r.json());
                 P = 800 + Math.floor(rating / 2.4);
               } else {
@@ -63,7 +63,7 @@ export async function GET(
               first = false;
               controller.enqueue(`${P}`);
               return P;
-            })
+            }),
           );
           redis.set(`E.${params.contest}`, E);
         } catch {}

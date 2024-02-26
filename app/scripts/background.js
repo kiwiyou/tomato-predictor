@@ -41,7 +41,7 @@ ext.runtime.onMessage.addListener((request, sender, sendResponse) => {
 
 async function getArenaInfo(contestId) {
   const remote = await fetch(
-    `https://tomato.kiwiyou.dev/api/arena/${contestId}`
+    `https://tomato.kiwiyou.dev/api/arena/${contestId}`,
   );
   if (!remote.ok) return null;
   const { arenaId, startTime, ratedRangeEnd } = await remote.json();
@@ -57,7 +57,7 @@ async function getExpectancy(contestId) {
     `https://tomato.kiwiyou.dev/api/expectancy/${contestId}`,
     {
       cache: "force-cache",
-    }
+    },
   );
   if (!remote.ok) return null;
   return await remote.json();
@@ -74,7 +74,7 @@ async function getRating({ handle, Pi, startTime }) {
     if (!isBefore(Ti, C)) continue;
     const Wi = Math.min(
       Math.pow(0.8, i),
-      Math.pow(0.25, differenceInDays(Ti, C) / 365)
+      Math.pow(0.25, differenceInDays(Ti, C) / 365),
     );
     numer += c(performance) * Wi;
     denom += Wi;
@@ -90,10 +90,10 @@ async function getRating({ handle, Pi, startTime }) {
       ? Math.max(1, 400 / Math.exp((400 - r) / 400))
       : r >= 2400
         ? 800 * Math.log((r - 1600) / 800) + 2400
-        : r
+        : r,
   );
   const remote = await fetch(
-    `https://solved.ac/api/v3/user/show?handle=${handle}`
+    `https://solved.ac/api/v3/user/show?handle=${handle}`,
   );
   const { arenaRating } = await remote.json();
   return {
@@ -108,7 +108,7 @@ async function getContests(handle) {
   const contests = [];
   do {
     const remote = await fetch(
-      `https://solved.ac/api/v3/user/contests?handle=${handle}&page=${page}`
+      `https://solved.ac/api/v3/user/contests?handle=${handle}&page=${page}`,
     );
     const { items, ...res } = await remote.json();
     count = res.count;
@@ -116,7 +116,7 @@ async function getContests(handle) {
       ...items.map(({ performance, arena: { startTime } }) => ({
         performance,
         startTime,
-      }))
+      })),
     );
     page += 1;
   } while (contests.length < count);

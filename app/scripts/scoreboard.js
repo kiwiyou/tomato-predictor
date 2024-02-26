@@ -10,7 +10,7 @@ async function init() {
   const E = await sendMessage({ query: "getExpectancy", contestId });
   if (E === null) return;
   const anchors = document.querySelectorAll(
-    'a[href^="https://solved.ac/profile/"]'
+    'a[href^="https://solved.ac/profile/"]',
   );
 
   const updateRating = (rankSpan, anchor) => {
@@ -65,7 +65,7 @@ async function init() {
       for (const rowDiv of mutation.addedNodes) {
         if (rowDiv.nodeType !== document.ELEMENT_NODE) continue;
         const anchor = rowDiv.querySelector(
-          'a[href^="https://solved.ac/profile/"]'
+          'a[href^="https://solved.ac/profile/"]',
         );
         if (!anchor) continue;
         const rankSpan =

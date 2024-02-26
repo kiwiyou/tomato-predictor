@@ -110,8 +110,8 @@ export async function getContests(handle: string): Promise<Contest[]> {
             endTime,
             ratedRangeStart,
             ratedRangeEnd,
-          })
-        )
+          }),
+        ),
       );
       page += 1;
     } while (contests.length < count);
