@@ -1,4 +1,4 @@
-import { parseISO, differenceInDays, isBefore } from 'date-fns';
+import { parseISO, differenceInDays, isBefore } from "date-fns";
 
 const ext = global.browser || global.chrome;
 
@@ -16,21 +16,21 @@ const B = [
   3000,
   3400,
   3400,
-  'Infinity',
+  "Infinity",
 ];
 
 ext.runtime.onMessage.addListener((request, sender, sendResponse) => {
-  if (request.query === 'getArenaInfo') {
+  if (request.query === "getArenaInfo") {
     getArenaInfo(request.contestId)
       .then(sendResponse)
       .catch(() => sendResponse(null));
     return true;
-  } else if (request.query === 'getExpectancy') {
-    getExpectancy(request.arenaInfo)
+  } else if (request.query === "getExpectancy") {
+    getExpectancy(request.contestId)
       .then(sendResponse)
       .catch(() => sendResponse(null));
     return true;
-  } else if (request.query === 'getRating') {
+  } else if (request.query === "getRating") {
     getRating(request.performance)
       .then(sendResponse)
       .catch(() => sendResponse(null));
@@ -40,90 +40,41 @@ ext.runtime.onMessage.addListener((request, sender, sendResponse) => {
 });
 
 async function getArenaInfo(contestId) {
-  const contests = await fetch(`https://solved.ac/api/v3/arena/contests`).then(
-    (r) => r.json(),
+  const remote = await fetch(
+    `https://tomato.kiwiyou.dev/api/arena/${contestId}`
   );
-  for (const contest of [...contests.ongoing, ...contests.ended]) {
-    if (contest.arenaBojContestId === contestId) {
-      return {
-        arenaId: contest.arenaId,
-        startTime: contest.startTime,
-        B: B[contest.ratedRangeEnd],
-      };
-    }
-  }
-  return null;
+  if (!remote.ok) return null;
+  const { arenaId, startTime, ratedRangeEnd } = await remote.json();
+  return {
+    arenaId,
+    startTime,
+    B: B[ratedRangeEnd],
+  };
 }
 
-async function getExpectancy({ arenaId, startTime }) {
-  const C = parseISO(startTime);
-  const E = [];
-  for (let page = 1; page <= 8; ++page) {
-    const { items: contestants } = await fetch(
-      `https://solved.ac/api/v3/arena/contestants?arenaId=${arenaId}&page=${page}&sort=rating&direction=desc`,
-      {
-        cache: 'force-cache',
-      },
-    ).then((r) => r.json());
-    for (const { handle } of contestants) {
-      const { items: contests } = await fetch(
-        `https://solved.ac/api/v3/user/contests?handle=${handle}&page=1&sort=id&direction=desc`,
-        {
-          cache: 'force-cache',
-        },
-      ).then((r) => r.json());
-      let numer = 0;
-      let denom = 0;
-      let i = 1;
-      for (const {
-        performance,
-        arena: { startTime, ratedRangeEnd },
-      } of contests) {
-        const Ti = parseISO(startTime);
-        if (!isBefore(Ti, C)) continue;
-        const pi = unfix(performance, ratedRangeEnd);
-        const Wi = Math.min(
-          Math.pow(0.8, i),
-          Math.pow(0.25, Math.floor(differenceInDays(C, Ti) / 365)),
-        );
-        numer += pi * Wi;
-        denom += Wi;
-        i++;
-      }
-      if (denom === 0) {
-        const { rating } = await fetch(
-          `https://solved.ac/api/v3/user/show?handle=${handle}`,
-          {
-            cache: 'force-cache',
-          },
-        ).then((r) => r.json());
-        E.push(800 + Math.floor(rating / 2.4));
-      } else {
-        E.push(numer / denom);
-      }
+async function getExpectancy(contestId) {
+  const remote = await fetch(
+    `https://tomato.kiwiyou.dev/api/expectancy/${contestId}`,
+    {
+      cache: "force-cache",
     }
-  }
-  return E;
+  );
+  if (!remote.ok) return null;
+  return await remote.json();
 }
 
 async function getRating({ handle, Pi, startTime }) {
   const C = parseISO(startTime);
-  const { items: contests } = await fetch(
-    `https://solved.ac/api/v3/user/contests?handle=${handle}&page=1&sort=id&direction=desc`,
-  ).then((r) => r.json());
   const c = (P) => Math.pow(2, P / 800);
   let numer = c(Pi) * 0.8;
   let denom = 0.8;
   let i = 2;
-  for (const {
-    performance,
-    arena: { startTime },
-  } of contests) {
+  for (const { performance, startTime } of await getContests(handle)) {
     const Ti = parseISO(startTime);
     if (!isBefore(Ti, C)) continue;
     const Wi = Math.min(
       Math.pow(0.8, i),
-      Math.pow(0.25, differenceInDays(Ti, C) / 365),
+      Math.pow(0.25, differenceInDays(Ti, C) / 365)
     );
     numer += c(performance) * Wi;
     denom += Wi;
@@ -139,18 +90,37 @@ async function getRating({ handle, Pi, startTime }) {
       ? Math.max(1, 400 / Math.exp((400 - r) / 400))
       : r >= 2400
         ? 800 * Math.log((r - 1600) / 800) + 2400
-        : r,
+        : r
   );
-  const { arenaRating } = await fetch(
-    `https://solved.ac/api/v3/user/show?handle=${handle}`,
-    {
-      cache: 'force-cache',
-    },
-  ).then((r) => r.json());
+  const remote = await fetch(
+    `https://solved.ac/api/v3/user/show?handle=${handle}`
+  );
+  const { arenaRating } = await remote.json();
   return {
     rating: R,
     delta: R - arenaRating,
   };
+}
+
+async function getContests(handle) {
+  let count = 0;
+  let page = 1;
+  const contests = [];
+  do {
+    const remote = await fetch(
+      `https://solved.ac/api/v3/user/contests?handle=${handle}&page=${page}`
+    );
+    const { items, ...res } = await remote.json();
+    count = res.count;
+    contests.push(
+      ...items.map(({ performance, arena: { startTime } }) => ({
+        performance,
+        startTime,
+      }))
+    );
+    page += 1;
+  } while (contests.length < count);
+  return contests;
 }
 
 function unfix(p, bi) {

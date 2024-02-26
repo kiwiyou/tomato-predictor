@@ -3,37 +3,37 @@ const ext = global.browser || global.chrome;
 init();
 
 async function init() {
-  const contestId = +new URL(location.href).searchParams.get('contestId');
+  const contestId = +new URL(location.href).searchParams.get("contestId");
   if (contestId === undefined) return;
-  const arenaInfo = await sendMessage({ query: 'getArenaInfo', contestId });
+  const arenaInfo = await sendMessage({ query: "getArenaInfo", contestId });
   if (arenaInfo === null) return;
-  const E = await sendMessage({ query: 'getExpectancy', arenaInfo });
+  const E = await sendMessage({ query: "getExpectancy", contestId });
   if (E === null) return;
   const anchors = document.querySelectorAll(
-    'a[href^="https://solved.ac/profile/"]',
+    'a[href^="https://solved.ac/profile/"]'
   );
 
   const updateRating = (rankSpan, anchor) => {
     const rankDiv = rankSpan.parentElement;
-    rankDiv.style.flexDirection = 'column';
-    const rank = +rankSpan.textContent.replace('#', '');
+    rankDiv.style.flexDirection = "column";
+    const rank = +rankSpan.textContent.replace("#", "");
     const P = computeP(E, rank, +arenaInfo.B);
 
-    let perfSpan = rankDiv.getElementsByClassName('tomato-perf')[0];
+    let perfSpan = rankDiv.getElementsByClassName("tomato-perf")[0];
     if (!perfSpan) {
-      perfSpan = document.createElement('div');
-      perfSpan.classList.add('tomato-perf');
+      perfSpan = document.createElement("div");
+      perfSpan.classList.add("tomato-perf");
       rankDiv.append(perfSpan);
     }
-    let ratingSpan = rankDiv.getElementsByClassName('tomato-rating')[0];
+    let ratingSpan = rankDiv.getElementsByClassName("tomato-rating")[0];
     if (!ratingSpan) {
-      ratingSpan = document.createElement('div');
-      ratingSpan.classList.add('tomato-rating');
+      ratingSpan = document.createElement("div");
+      ratingSpan.classList.add("tomato-rating");
       rankDiv.append(ratingSpan);
     }
 
     sendMessage({
-      query: 'getRating',
+      query: "getRating",
       performance: {
         handle: anchor.textContent,
         Pi: P,
@@ -43,9 +43,9 @@ async function init() {
       if (!ratingInfo) return;
       const { rating, delta } = ratingInfo;
       perfSpan.replaceChildren(`P ${P}`);
-      const sup = document.createElement('sup');
+      const sup = document.createElement("sup");
       sup.append(delta > 0 ? `+${delta}` : `${delta}`);
-      if (delta < 0) sup.classList.add('tomato-neg');
+      if (delta < 0) sup.classList.add("tomato-neg");
       ratingSpan.replaceChildren(`R ${rating}`, sup);
     });
   };
@@ -53,7 +53,7 @@ async function init() {
   const observeRankChange = (mutations) => {
     for (const mutation of mutations) {
       let rankSpan = mutation.target;
-      while (rankSpan.tagName !== 'SPAN') rankSpan = rankSpan.parentElement;
+      while (rankSpan.tagName !== "SPAN") rankSpan = rankSpan.parentElement;
       const anchor =
         rankSpan.parentElement.nextElementSibling.firstElementChild;
       updateRating(rankSpan, anchor);
@@ -65,7 +65,7 @@ async function init() {
       for (const rowDiv of mutation.addedNodes) {
         if (rowDiv.nodeType !== document.ELEMENT_NODE) continue;
         const anchor = rowDiv.querySelector(
-          'a[href^="https://solved.ac/profile/"]',
+          'a[href^="https://solved.ac/profile/"]'
         );
         if (!anchor) continue;
         const rankSpan =
@@ -86,7 +86,7 @@ async function init() {
     updateRating(rankSpan, anchor);
   });
 
-  const root = document.getElementById('root');
+  const root = document.getElementById("root");
 
   new MutationObserver(observeTree).observe(root, {
     subtree: true,

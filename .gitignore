@@ -4,3 +4,4 @@ packages
 pnpm-lock.yaml
 .tool-versions
 /.vscode
+yarn.lock
