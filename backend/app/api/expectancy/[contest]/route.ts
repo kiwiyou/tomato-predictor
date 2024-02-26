@@ -3,7 +3,7 @@ import { differenceInDays, isBefore, parseISO } from "date-fns";
 import { getContestants, getContests, getCurrentArenas, unfix } from "~/solved";
 
 export const dynamic = "force-dynamic";
-export const runtime = "edge";
+export const runtime = "nodejs";
 
 export async function GET(
   request: Request,
