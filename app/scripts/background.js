@@ -102,7 +102,10 @@ async function getRating({ handle, arenaId, Pi, startTime }) {
   let arenaRating = 0;
   if (!thatArena) {
     const remote = await fetch(
-      `https://solved.ac/api/v3/user/show?handle=${handle}`
+      `https://solved.ac/api/v3/user/show?handle=${handle}`,
+      {
+        cache: "force-cache",
+      }
     );
     const res = await remote.json();
     console.log(res);
@@ -123,7 +126,8 @@ async function getContests(handle) {
   const contests = [];
   do {
     const remote = await fetch(
-      `https://solved.ac/api/v3/user/contests?handle=${handle}&page=${page}`
+      `https://solved.ac/api/v3/user/contests?handle=${handle}&page=${page}`,
+      { cache: "force-cache" }
     );
     const { items, ...res } = await remote.json();
     if (res.count === 0) break;
