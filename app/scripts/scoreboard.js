@@ -10,7 +10,7 @@ async function init() {
   const E = await sendMessage({ query: "getExpectancy", contestId });
   if (E === null) return;
   const anchors = document.querySelectorAll(
-    'a[href^="https://solved.ac/profile/"]',
+    'a[href^="https://solved.ac/profile/"]'
   );
 
   const updateRating = (rankSpan, anchor) => {
@@ -25,6 +25,7 @@ async function init() {
       perfSpan.classList.add("tomato-perf");
       rankDiv.append(perfSpan);
     }
+    perfSpan.replaceChildren(`P ${P}`);
     let ratingSpan = rankDiv.getElementsByClassName("tomato-rating")[0];
     if (!ratingSpan) {
       ratingSpan = document.createElement("div");
@@ -40,9 +41,9 @@ async function init() {
         ...arenaInfo,
       },
     }).then((ratingInfo) => {
+      console.log(anchor.textContent, ratingInfo);
       if (!ratingInfo) return;
       const { rating, delta } = ratingInfo;
-      perfSpan.replaceChildren(`P ${P}`);
       const sup = document.createElement("sup");
       sup.append(delta > 0 ? `+${delta}` : `${delta}`);
       if (delta < 0) sup.classList.add("tomato-neg");
@@ -65,7 +66,7 @@ async function init() {
       for (const rowDiv of mutation.addedNodes) {
         if (rowDiv.nodeType !== document.ELEMENT_NODE) continue;
         const anchor = rowDiv.querySelector(
-          'a[href^="https://solved.ac/profile/"]',
+          'a[href^="https://solved.ac/profile/"]'
         );
         if (!anchor) continue;
         const rankSpan =
@@ -80,11 +81,11 @@ async function init() {
     }
   };
 
-  anchors.forEach((anchor) => {
+  for (const anchor of anchors) {
     const rankSpan =
       anchor.parentElement.previousElementSibling.firstElementChild;
     updateRating(rankSpan, anchor);
-  });
+  }
 
   const root = document.getElementById("root");
 
@@ -99,13 +100,13 @@ function sendMessage(args) {
 }
 
 function computeP(E, k, B) {
-  let l = 0,
-    r = 4000;
+  let l = 0;
+  let r = 4000;
   while (r - l > 1e-2) {
     const X = (l + r) / 2;
     let s = 0;
     for (const Ei of E) {
-      s += 1 / (1 + Math.pow(10, (X - Ei) / 400));
+      s += 1 / (1 + 10 ** ((X - Ei) / 400));
     }
     if (s > k - 0.5) {
       l = X;
