@@ -1,4 +1,4 @@
-import { Redis } from "@upstash/redis/cloudflare";
+import { Redis } from "@upstash/redis";
 
 export type Arena = {
   arenaBojContestId: number;
@@ -39,6 +39,7 @@ export async function getContestants(id: number): Promise<string[]> {
     const remote = await fetch(url);
     const { items, ...res }: { items: { handle: string }[]; count: number } =
       await remote.json();
+    if (items.length === 0) break;
     count = res.count;
     contestants.push(...items.map(({ handle }) => handle));
     page += 1;
@@ -91,7 +92,6 @@ export async function getContests(
       const url = new URL("https://solved.ac/api/v3/user/contests");
       url.searchParams.set("handle", handle);
       url.searchParams.set("page", page.toString());
-      console.log(url.toString());
       const remote = await fetch(url);
       const {
         items,
@@ -100,6 +100,7 @@ export async function getContests(
         items: (Record<string, unknown> & { arena: Record<string, unknown> })[];
         count: number;
       } = await remote.json();
+      if (items.length === 0) break;
       count = +res.count;
       contests.push(
         ...items.map(
