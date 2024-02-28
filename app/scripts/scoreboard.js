@@ -41,7 +41,6 @@ async function init() {
         ...arenaInfo,
       },
     }).then((ratingInfo) => {
-      console.log(anchor.textContent, ratingInfo);
       if (!ratingInfo) return;
       const { rating, delta } = ratingInfo;
       const sup = document.createElement("sup");

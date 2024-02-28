@@ -108,12 +108,10 @@ async function getRating({ handle, arenaId, Pi, startTime }) {
       }
     );
     const res = await remote.json();
-    console.log(res);
     arenaRating = res.arenaRating;
   } else {
     arenaRating = thatArena.ratingBefore;
   }
-  console.log(handle, arenaId, R);
   return {
     rating: R,
     delta: R - arenaRating,
