@@ -59,7 +59,7 @@ async function getArenaInfo(contestId) {
   return {
     arenaId,
     startTime,
-    B: +B[ratedRangeEnd],
+    B: B[ratedRangeEnd],
   };
 }
 
